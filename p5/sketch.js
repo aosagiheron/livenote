@@ -34,22 +34,23 @@ function setup() {
 
 function draw() {
   background(240);
-  let size = 8;
+  let size = 6;
   strokeWeight(size);
 
   let V = [[120,60], [40,210], [300,270]];
+  V[0] = [mouseX, mouseY];
 
   let r = V[0];
   let g = sub(V[1], r);
   let h = sub(V[2], r);
 
-  stroke(210);
+  strokeWeight(0);
+  fill(220);
   for(let x=0; x<width; x+=size) {
     for(let y=0; y<height; y+=size) {
-      point(x,y);
+      rect(x, y, size-2, size-2);
     }
   }
-  stroke(0);
 
   //----- ナイーブすぎる実装
   /*
@@ -78,25 +79,41 @@ function draw() {
   }
   */
 
-  //----- よい実装
+  //----- よりよい実装
   let minY = min(V[0][1], V[1][1], V[2][1]);
   let maxY = max(V[0][1], V[1][1], V[2][1]);
+  minY -= minY % size;
+  maxY -= maxY % size;
 
   for(let y=minY; y<maxY; y+=size) {
-    let x0 = r[0] + ((y-r[1])/g[1])*g[0];
-    let x1 = r[0] + ((y-r[1])/h[1])*h[0];
-
     let t = (y-r[1]-g[1])/(h[1]-g[1]);
-    let x2 = r[0]+g[0]+t*(h[0]-g[0]);
+    let xAll =[
+      r[0] + ((y - r[1]) / g[1]) * g[0],
+      r[0] + ((y-r[1])/h[1])*h[0],
+      r[0]+g[0]+t*(h[0]-g[0]),
+    ];
 
-    let minX = min(max(x0, x2), x1);
-    let maxX = max(max(x0, x2), x1);
+    let xInside = xAll.filter(x => {
+      let v = sub([x,y], r);
+      let w = Minv_v(g, h, v);
+      let e = 0.001;
+      return w[0]>-e && w[1]>-e && (w[0]+w[1])<(e+1.05);
+    });
+
+    let minX = min(xInside);
+    let maxX = max(xInside);
     minX -= minX % size;
     maxX -= maxX % size;
-    stroke('red');
-    point(minX,y);
-    stroke('blue');
-    point(maxX,y);
+
+    strokeWeight(0);
+    fill(150);
+    for(let x=minX; x<maxX; x+=size) {
+      rect(x, y, size-2, size-2);
+    }
+
+    fill(0);
+    rect(minX, y, size-2, size-2);
+    rect(maxX, y, size-2, size-2);
   }
 
   stroke(0);
