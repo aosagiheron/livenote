@@ -27,9 +27,44 @@ function setup() {
   createCanvas(360,360);
 }
 
-function draw() {
-  background(220);
-  strokeWeight(12);
 
-  let V = [[120,150], [60,240], [300,285]];
+function draw() {
+  background(240);
+  let size = 12;
+  strokeWeight(size);
+
+  let V = [[120,90], [60,240], [300,285]];
+  V[0] = [mouseX, mouseY];
+
+  let r = V[0];
+  let g = sub(V[1], r);
+  let h = sub(V[2], r);
+
+  stroke(210);
+  for(let x=0; x<width; x+=size) {
+    for(let y=0; y<height; y+=size) {
+      point(x,y);
+    }
+  }
+
+  //----- ナイーブすぎる実装
+  stroke(0);
+  for(let s=0; s<1; s+=1/6) {
+    for(let t=0; t<1; t+=1/6) {
+      let w = add(add(mul(t*(1-s), g), mul(s*t, h)), r);
+      w[0] -= w[0] % size;
+      w[1] -= w[1] % size;
+      point(...w);
+    }
+  }
+  //-----
+
+  //----- よい実装
+  let beginY = min(V[0][1], V[1][1], V[2][1]);
+  let endY = max(V[0][1], V[1][1], V[2][1]);
+
+  strokeWeight(2);
+  line(0,beginY, width, beginY);
+  line(0,endY, width, endY);
+  //-----
 }
